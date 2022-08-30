@@ -6,7 +6,7 @@
 
 # useful for handling different item types with a single interface
 
-from pyutil.program.json_util import json_encode
+from spy1st.items import SpiderPageItem
 
 
 class Spy1StPipeline:
@@ -49,14 +49,13 @@ class SpiderGoodsPipeline:
         # elif isinstance(item, SpiderGoodsSizeItem):
         #     print(f"{type(item)} {dict(item)}")
         #
-        # elif isinstance(item, SpiderPageItem):
-        #     kwargs = json_encode(dict(item), ensure_ascii=False)
-        #     print(f"{type(item)} {dict(item)}")
-        #     print(f"{dict(item).get('platform')=}")
+        if isinstance(item, SpiderPageItem):
+            kwargs = dict(item)
+            print(f"{type(item)} {dict(item)}")
+            print(f"{dict(item).get('raw_html')=}")
 
         # else:
         #     raise ValueError(item)
-        print(json_encode(dict(item), ensure_ascii=False))
         return item
 
     def close_spider(self, spider):

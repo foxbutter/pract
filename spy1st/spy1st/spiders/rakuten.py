@@ -1,4 +1,5 @@
 import json
+import json
 import logging
 import random
 import re
@@ -22,7 +23,7 @@ class RakutenSpider(CustomSpider):
         "メーカー在庫あり(取り寄せ)": 0,
     }
     STANDARD_PRICE_PATTERN = re.compile(r"\D*([\d|,]+)円.*")
-    SIZE_PATTERN = re.compile(r"\s*(\S+)\s*/\s*")
+    SIZE_PATTERN = re.compile(r"\s*([\S|\s]+)\s*/\s*")
 
     # 指定当前爬虫的配置
     custom_settings = {
@@ -58,7 +59,7 @@ class RakutenSpider(CustomSpider):
         #     meta={"page_type": 3, "shop_id": 999, "config": {"platform": const.PlatformType.PLATFORM_RAKUTEN}},
         # )
         yield scrapy.Request(
-            url="https://brandavenue.rakuten.co.jp/item/EJ6162/",
+            url="https://brandavenue.rakuten.co.jp/item/DB1499/",
             callback=self.parse,
             meta={"page_type": 2, "shop_id": 999, "config": {"platform": const.PlatformType.PLATFORM_RAKUTEN}},
         )
@@ -99,7 +100,7 @@ class RakutenSpider(CustomSpider):
     def _extract_goods_domain_brand(self, response):
         yield SpiderPageItem(
             platform=response.meta["config"].get("platform", 0),
-            # raw_html=response.body,
+            raw_html=response.body,
             url=response.url,
             page_type=response.meta["page_type"],
             meta=response.meta,
@@ -371,7 +372,7 @@ class RakutenSpider(CustomSpider):
         for x in size_str_ls:
             matched = self.SIZE_PATTERN.match(x)
             if matched:
-                return matched.group(1)
+                return matched.group(1).strip()
         return ""
 
     def _extract_sku_stock(self, stock_str_ls):

@@ -11,9 +11,8 @@ from scrapy import signals
 
 from shared import const
 from spy1st.utils import threading_local_var_get, threading_local_var_set
-
-
 # useful for handling different item types with a single interface
+from spy1st.wd import Webdriver
 
 
 class Spy1StSpiderMiddleware:
@@ -122,10 +121,9 @@ class WebDriverDownloaderMiddleware:
         self.settings = settings
 
     def _init(self, settings):
-        # if not threading_local_var_get("webdriver"):
-        #     webdriver = Webdriver.create(proxy=False)
-        #     threading_local_var_set("webdriver", webdriver)
-        pass
+        if not threading_local_var_get("webdriver"):
+            webdriver = Webdriver.create(proxy=False)
+            threading_local_var_set("webdriver", webdriver)
 
     @classmethod
     def from_crawler(cls, crawler):
