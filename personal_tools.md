@@ -1,5 +1,4 @@
 # 个人工具箱
-> https://github.com/pseudoyu/yu-tools
 
 ## 前言
 
@@ -364,4 +363,5 @@
 
 ## 参考资料
 
-> 1. [個人工具箱（2021 十二月）](https://blog.gasolin.idv.tw/tools/tooling-in-2021-Dec)
+> 1. https://github.com/pseudoyu/yu-tools
+> 2. [個人工具箱（2021 十二月）](https://blog.gasolin.idv.tw/tools/tooling-in-2021-Dec)
