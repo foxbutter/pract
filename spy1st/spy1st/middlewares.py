@@ -9,7 +9,6 @@ from random import randint
 import scrapy
 from scrapy import signals
 
-from shared import const
 from spy1st.utils import threading_local_var_get, threading_local_var_set
 # useful for handling different item types with a single interface
 from spy1st.wd import Webdriver
@@ -130,7 +129,7 @@ class WebDriverDownloaderMiddleware:
         return cls(crawler.settings)
 
     def process_request(self, request, spider):
-        if request.meta["config"].get("platform", 0) == const.PlatformType.PLATFORM_RAKUTEN:
+        if request.meta["config"].get("platform", 0) == 4:
             return None
 
         for i in range(self.RETRIES):

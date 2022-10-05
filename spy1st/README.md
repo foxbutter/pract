@@ -5,7 +5,7 @@
 
 - 功能：
   - 爬取乐天商品数据
-    `scrapy craw rakuten`
+    `scrapy crawl rakuten`
     
   - WebDriver 简单使用，打开Bilibili
 

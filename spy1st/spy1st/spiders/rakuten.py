@@ -8,7 +8,6 @@ from urllib.parse import urlparse, parse_qsl
 
 import scrapy
 
-from shared import const
 from spy1st.items import SpiderGoodsItem, SpiderGoodsSkuItem, SpiderGoodsSkuImgItem, SpiderGoodsSizeItem, \
     SpiderPageItem, SpiderGoodsImgItem
 from spy1st.spiders import CustomSpider
@@ -53,16 +52,16 @@ class RakutenSpider(CustomSpider):
         #     callback=self.parse,
         #     meta={"page_type": 1, "config": {"platform": const.PlatformType.PLATFORM_RAKUTEN}},
         # )
-        # yield scrapy.Request(
-        #     url=self._goods_list_url("https://brandavenue.rakuten.co.jp/categorylist/"),
-        #     callback=self.parse,
-        #     meta={"page_type": 3, "shop_id": 999, "config": {"platform": const.PlatformType.PLATFORM_RAKUTEN}},
-        # )
         yield scrapy.Request(
-            url="https://brandavenue.rakuten.co.jp/item/DB1499/",
+            url=self._goods_list_url("https://brandavenue.rakuten.co.jp/categorylist/"),
             callback=self.parse,
-            meta={"page_type": 2, "shop_id": 999, "config": {"platform": const.PlatformType.PLATFORM_RAKUTEN}},
+            meta={"page_type": 3, "shop_id": 999, "config": {"platform": 4}},
         )
+        # yield scrapy.Request(
+        #     url="https://brandavenue.rakuten.co.jp/item/DB1499/",
+        #     callback=self.parse,
+        #     meta={"page_type": 2, "shop_id": 999, "config": {"platform": 4}},
+        # )
         print("!!!!!!!!!!!!!!!!!!!")
 
     def parse(self, response):
@@ -73,6 +72,7 @@ class RakutenSpider(CustomSpider):
         }
         for method in methods[response.meta.get("page_type")]:
             for v in method(response):
+                print("-------------------")
                 yield v
 
     def _extract_cats(self, response):
@@ -80,6 +80,7 @@ class RakutenSpider(CustomSpider):
             pc = dl.xpath("./dt/a/text()").extract_first()
             for cx in dl.xpath("./dd//li/a/text()").extract():
                 print(f"{pc} > {cx}")
+        print("end.............")
 
     def _extract_goods(self, response) -> object:
         # 解析goods/sku > item
@@ -138,7 +139,7 @@ class RakutenSpider(CustomSpider):
         desc = self.remove_html_tag(desc, main_html.xpath(".//div[@class='item-info']//div[@class='item-detail']//div[@class='item-detail-item']"))
 
         yield SpiderGoodsItem(
-            platform=const.PlatformType.PLATFORM_RAKUTEN,
+            platform=4,
             goods_no=spu_no,
             shop=xxx[0].css("a::text").extract_first(default="").strip(),
             brand=xxx[1].css("a::text").extract_first(default=""),
@@ -185,7 +186,7 @@ class RakutenSpider(CustomSpider):
                 )
                 sku_no = f"{response.meta['shop_id']}_{sku_meta}"
                 yield SpiderGoodsSkuItem(
-                    platform=const.PlatformType.PLATFORM_RAKUTEN,
+                    platform=4,
                     goods_sku_no=sku_no,
                     goods_no=spu_no,
                     style=style_str,
@@ -195,7 +196,7 @@ class RakutenSpider(CustomSpider):
                 )
 
                 yield SpiderGoodsSkuImgItem(
-                    platform=const.PlatformType.PLATFORM_RAKUTEN,
+                    platform=4,
                     goods_no=spu_no,
                     goods_sku_no=sku_no,
                     style=style_str,
