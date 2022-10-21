@@ -4,7 +4,7 @@ import logging
 import random
 import re
 from datetime import datetime
-from urllib.parse import urlparse, parse_qsl
+from urllib.parse import urlparse, parse_qsl, urljoin
 
 import scrapy
 
@@ -53,12 +53,12 @@ class RakutenSpider(CustomSpider):
         #     meta={"page_type": 1, "config": {"platform": const.PlatformType.PLATFORM_RAKUTEN}},
         # )
         yield scrapy.Request(
-            url=self._goods_list_url("https://brandavenue.rakuten.co.jp/categorylist/"),
+            url=self._goods_list_url("http://brandavenue.rakuten.co.jp/categorylist/"),
             callback=self.parse,
             meta={"page_type": 3, "shop_id": 999, "config": {"platform": 4}},
         )
         # yield scrapy.Request(
-        #     url="https://brandavenue.rakuten.co.jp/item/DB1499/",
+        #     url="http://brandavenue.rakuten.co.jp/item/ES9659/",
         #     callback=self.parse,
         #     meta={"page_type": 2, "shop_id": 999, "config": {"platform": 4}},
         # )
@@ -173,9 +173,11 @@ class RakutenSpider(CustomSpider):
             ".//div[@class='item-info']//div[@class='item-sku-actions']//dl[@class='item-sku-actions-color']"
         )
         for color in colors:
-            style_meta = color.xpath("./dt[@class='item-sku-actions-color-thumbnail']/img")
-            style_str = style_meta.xpath("./@alt").extract_first(default='').strip()
-            style_img_url = response.urljoin(style_meta.xpath("./@src").extract_first(default='').strip())
+            style_meta = color.xpath("./dt[@class='item-sku-actions-color-thumbnail']")
+            style_str = style_meta.xpath("./div/div/text()").extract_first(default='').strip()
+            style_img_url = self.get_pure_url(
+                urljoin(response.url, style_meta.xpath("./img/@src").extract_first(default='').strip())
+            )
             for size_meta in color.xpath("./dd[@class='item-sku-actions-color-action']//li"):
                 size = self._extract_sku_size(size_meta.xpath("./div[@class='item-sku-actions-info']/text()").extract())
                 quantity = self._extract_sku_stock(
