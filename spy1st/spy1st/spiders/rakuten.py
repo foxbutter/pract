@@ -1,5 +1,4 @@
 import json
-import json
 import logging
 import random
 import re
@@ -8,8 +7,14 @@ from urllib.parse import urlparse, parse_qsl, urljoin
 
 import scrapy
 
-from spy1st.items import SpiderGoodsItem, SpiderGoodsSkuItem, SpiderGoodsSkuImgItem, SpiderGoodsSizeItem, \
-    SpiderPageItem, SpiderGoodsImgItem
+from spy1st.items import (
+    SpiderGoodsItem,
+    SpiderGoodsSkuItem,
+    SpiderGoodsSkuImgItem,
+    SpiderGoodsSizeItem,
+    SpiderPageItem,
+    SpiderGoodsImgItem,
+)
 from spy1st.spiders import CustomSpider
 
 
@@ -31,7 +36,7 @@ class RakutenSpider(CustomSpider):
         },
         "ITEM_PIPELINES": {
             'spy1st.pipelines.SpiderGoodsPipeline': 400,
-        }
+        },
     }
     PROXY = "http://rhvkc4u_psd-zone-custom-region-jp:ebDX4yxxy7@proxy.ipidea.io:2333"
 
@@ -50,18 +55,18 @@ class RakutenSpider(CustomSpider):
         # yield scrapy.Request(
         #     url=self._goods_list_url("https://brandavenue.rakuten.co.jp/all-sites/cateb-0000000019/catem-0000000011/"),
         #     callback=self.parse,
-        #     meta={"page_type": 1, "config": {"platform": const.PlatformType.PLATFORM_RAKUTEN}},
+        #     meta={"page_type": 1, "config": {"platform": const.PlatformType.PLATFORM_RAKUTEN}},\
+        # )
+        # yield scrapy.Request(
+        #     url=self._goods_list_url("http://brandavenue.rakuten.co.jp/categorylist/"),
+        #     callback=self.parse,
+        #     meta={"page_type": 3, "shop_id": 999, "config": {"platform": 4}},
         # )
         yield scrapy.Request(
-            url=self._goods_list_url("http://brandavenue.rakuten.co.jp/categorylist/"),
+            url="http://brandavenue.rakuten.co.jp/item/ES9659/",
             callback=self.parse,
-            meta={"page_type": 3, "shop_id": 999, "config": {"platform": 4}},
+            meta={"page_type": 2, "shop_id": 999, "config": {"platform": 4}},
         )
-        # yield scrapy.Request(
-        #     url="http://brandavenue.rakuten.co.jp/item/ES9659/",
-        #     callback=self.parse,
-        #     meta={"page_type": 2, "shop_id": 999, "config": {"platform": 4}},
-        # )
         print("!!!!!!!!!!!!!!!!!!!")
 
     def parse(self, response):
@@ -136,7 +141,10 @@ class RakutenSpider(CustomSpider):
             ".//div[@class='item-info']//div[@class='item-detail']//div[@class='item-detail-item']"
         ).extract()[0:2]
         desc = '<div class="contbox">' + "".join(desc_abouts).strip().replace("原産国", "原産地") + '</div>'
-        desc = self.remove_html_tag(desc, main_html.xpath(".//div[@class='item-info']//div[@class='item-detail']//div[@class='item-detail-item']"))
+        desc = self.remove_html_tag(
+            desc,
+            main_html.xpath(".//div[@class='item-info']//div[@class='item-detail']//div[@class='item-detail-item']"),
+        )
 
         yield SpiderGoodsItem(
             platform=4,
@@ -173,10 +181,15 @@ class RakutenSpider(CustomSpider):
             ".//div[@class='item-info']//div[@class='item-sku-actions']//dl[@class='item-sku-actions-color']"
         )
         for color in colors:
-            style_meta = color.xpath("./dt[@class='item-sku-actions-color-thumbnail']")
-            style_str = style_meta.xpath("./div/div/text()").extract_first(default='').strip()
+            style_meta = color.xpath("./dt[@class='item-sku-actions-color-thumbnail']/img")
+            style_str = style_meta.xpath("./@alt").extract_first(default='').strip()
             style_img_url = self.get_pure_url(
-                urljoin(response.url, style_meta.xpath("./img/@src").extract_first(default='').strip())
+                urljoin(response.url, style_meta.xpath("./@src").extract_first(default='').strip())
+            )
+            style_completed_str = (
+                color.xpath("./dt[@class='item-sku-actions-color-thumbnail']/div/div/text()")
+                .extract_first(default='')
+                .strip()
             )
             for size_meta in color.xpath("./dd[@class='item-sku-actions-color-action']//li"):
                 size = self._extract_sku_size(size_meta.xpath("./div[@class='item-sku-actions-info']/text()").extract())
