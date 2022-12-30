@@ -38,7 +38,7 @@ class RakutenSpider(CustomSpider):
             'spy1st.pipelines.SpiderGoodsPipeline': 400,
         },
     }
-    PROXY = "http://rhvkc4u_psd-zone-custom-region-jp:ebDX4yxxy7@proxy.ipidea.io:2333"
+    # PROXY = "http://rhvkc4u_psd-zone-custom-region-jp:ebDX4yxxy7@proxy.ipidea.io:2333"
 
     def start_requests(self):
         # for v in Config.load().rakuten_all:
@@ -62,18 +62,33 @@ class RakutenSpider(CustomSpider):
         #     callback=self.parse,
         #     meta={"page_type": 3, "shop_id": 999, "config": {"platform": 4}},
         # )
+        # yield scrapy.Request(
+        #     url="http://brandavenue.rakuten.co.jp/item/ES9659/",
+        #     callback=self.parse,
+        #     meta={"page_type": 2, "shop_id": 999, "config": {"platform": 4}},
+        # )
         yield scrapy.Request(
-            url="http://brandavenue.rakuten.co.jp/item/ES9659/",
+            url="https://brandavenue.rakuten.co.jp/item/ES9659/",
             callback=self.parse,
             meta={"page_type": 2, "shop_id": 999, "config": {"platform": 4}},
         )
+        # COORDINATE_META_URL = (
+        #     'https://brandavenue.rakuten.co.jp/front-api-lite/parts?'
+        #     'parts=name%EF%BD%9Ccoordinateitem%EF%BF%A3modelCd%EF%BD%9C{}%EF%BF%A3cnt%EF%BD%9C20&_={}'
+        # )
+        # yield scrapy.Request(
+        #     url=COORDINATE_META_URL.format('GW6297', int(time.time() * 1000)),
+        #     callback=self.parse,
+        #     meta={"page_type": 4, "shop_id": 999, "config": {"platform": 4}},
+        # )
         print("!!!!!!!!!!!!!!!!!!!")
 
     def parse(self, response):
         methods = {
             1: (self._process_list,),
-            2: (self._fetch_coordinate, self._extract_goods),
+            2: (self._extract_goods,),
             3: (self._extract_cats,),
+            4: (self._fetch_coordinate,),
         }
         for method in methods[response.meta.get("page_type")]:
             for v in method(response):
@@ -145,7 +160,8 @@ class RakutenSpider(CustomSpider):
             desc,
             main_html.xpath(".//div[@class='item-info']//div[@class='item-detail']//div[@class='item-detail-item']"),
         )
-
+        imgs = response.xpath('//div[@class="slick-track"]/li//a/@href').extract()
+        print("response:\n", response.text)
         yield SpiderGoodsItem(
             platform=4,
             goods_no=spu_no,
@@ -299,6 +315,7 @@ class RakutenSpider(CustomSpider):
         return []
 
     def _fetch_coordinate(self, response):
+        print(response)
         return []
 
     def _process_list(self, response):
