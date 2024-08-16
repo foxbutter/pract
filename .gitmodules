@@ -1,0 +1,3 @@
+[submodule "jd_seckill"]
+	path = jd_seckill
+	url = https://github.com/andyzys/jd_seckill
